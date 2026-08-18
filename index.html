@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gabrielle Shrager — Narrative Design</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink: #333338;
+    --panel: #3d3d43;
+    --panel-2: #46464d;
+    --gold: #d3a85e;
+    --gold-dim: #a6864c;
+    --teal: #8bb0bd;
+    --parchment: #000000;
+    --muted: #1a1a1a;
+    --line: rgba(0,0,0,0.22);
+    --glow: rgba(211,168,94,0.14);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--ink);
+    color:var(--parchment);
+    font-family:'Inter', sans-serif;
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+  ::selection{background:var(--gold); color:var(--ink);}
+
+  a{color:inherit;}
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.72rem;
+    letter-spacing:0.22em;
+    text-transform:uppercase;
+    color:var(--parchment);
+  }
+  h1,h2,h3{font-family:'Space Grotesk', sans-serif; font-weight:600; letter-spacing:-0.02em;}
+
+  /* ambient texture */
+  .grain{
+    position:fixed; inset:0; pointer-events:none; z-index:1; opacity:0.05;
+    background-image: radial-gradient(circle at 1px 1px, #000000 1px, transparent 0);
+    background-size: 3px 3px;
+  }
+  .vignette{
+    position:fixed; inset:0; pointer-events:none; z-index:1;
+    background: radial-gradient(ellipse at 50% 0%, transparent 40%, rgba(0,0,0,0.55) 100%);
+  }
+
+  /* ---------- QUEST LOG NAV ---------- */
+  .questlog{
+    position:fixed; top:0; right:0; height:100vh; width:220px;
+    display:flex; flex-direction:column; justify-content:center;
+    padding:0 2.2rem; z-index:50; gap:1.1rem;
+  }
+  .questlog .ql-title{
+    font-family:'JetBrains Mono', monospace; font-size:0.65rem;
+    letter-spacing:0.2em; color:var(--muted); text-transform:uppercase;
+    margin-bottom:0.6rem; opacity:0.7;
+  }
+  .ql-item{
+    display:flex; align-items:baseline; gap:0.6rem; cursor:pointer;
+    font-family:'JetBrains Mono', monospace; font-size:0.78rem;
+    color:var(--muted); transition:color 0.35s ease, transform 0.35s ease;
+    text-decoration:none; opacity:0.55;
+  }
+  .ql-item .ql-mark{ color:var(--gold-dim); transition:color .35s ease;}
+  .ql-item.active{ color:var(--parchment); opacity:1; transform:translateX(-4px);}
+  .ql-item.active .ql-mark{ color:var(--parchment); }
+  .ql-item:hover{ color:var(--parchment); opacity:1; }
+  @media (max-width: 980px){ .questlog{display:none;} }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    min-height:100vh; display:flex; flex-direction:column; justify-content:center;
+    padding: 8vh 8vw; position:relative; z-index:2;
+    border-bottom:1px solid var(--line);
+  }
+  .hero::before{
+    content:''; position:absolute; top:0; left:0; right:0; height:100%;
+    background: linear-gradient(180deg, var(--glow) 0%, transparent 45%);
+    opacity:0.5; pointer-events:none;
+  }
+  .hero-eyebrow{ margin-bottom:1.4rem; opacity:0; animation:rise 0.9s ease forwards 0.1s;}
+  .hero h1{
+    font-size:clamp(3rem, 9vw, 7.5rem);
+    line-height:0.92; color:var(--parchment);
+    text-transform:uppercase;
+    opacity:0; animation:rise 1s ease forwards 0.25s;
+  }
+  .hero h1 span{
+    display:block; color:var(--parchment);
+    font-weight:600;
+  }
+  .hero-tagline{
+    max-width:640px; margin-top:2rem; font-size:1.15rem; color:var(--muted);
+    font-weight:400; opacity:0; animation:rise 1s ease forwards 0.45s;
+  }
+  .hero-tagline strong{ color:var(--parchment); font-weight:500;}
+  .hero-meta{
+    margin-top:3rem; display:flex; gap:2.5rem; flex-wrap:wrap;
+    font-family:'JetBrains Mono', monospace; font-size:0.75rem; color:var(--muted);
+    opacity:0; animation:rise 1s ease forwards 0.65s;
+  }
+  .hero-meta div span{ display:block; color:var(--parchment); font-size:1.1rem; font-family:'Space Grotesk',sans-serif; margin-top:0.2rem;}
+  @keyframes rise{ from{opacity:0; transform:translateY(18px);} to{opacity:1; transform:translateY(0);} }
+
+  .scroll-cue{
+    position:absolute; bottom:2.5rem; left:8vw; font-family:'JetBrains Mono',monospace;
+    font-size:0.68rem; letter-spacing:0.18em; color:var(--muted); text-transform:uppercase;
+    display:flex; align-items:center; gap:0.6rem;
+  }
+  .scroll-cue::after{
+    content:''; width:1px; height:32px; background:linear-gradient(var(--gold), transparent);
+    animation:pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse{ 0%,100%{opacity:0.3;} 50%{opacity:1;} }
+
+  section{ position:relative; z-index:2; padding: 7rem 8vw; max-width:1180px; margin:0 auto;}
+  @media (min-width:981px){ section{ padding-right:calc(220px + 8vw); } }
+
+  .section-head{ display:flex; align-items:baseline; gap:1rem; margin-bottom:3rem;}
+  .section-head h2{ font-size:clamp(1.8rem,3.2vw,2.6rem); color:var(--parchment);}
+  .section-head .eyebrow{ white-space:nowrap; }
+  .section-rule{ flex:1; height:1px; background:var(--line); }
+
+  /* ---------- ABOUT ---------- */
+  .about-grid{ display:grid; grid-template-columns: 1.2fr 1fr; gap:4rem; align-items:start;}
+  .about-lead{ font-size:1.3rem; font-family:'Space Grotesk',sans-serif; font-weight:400; color:var(--parchment); line-height:1.5;}
+  .about-body{ margin-top:1.5rem; color:var(--muted); font-size:1rem; max-width:52ch;}
+  .about-stats{ display:flex; flex-direction:column; gap:1.6rem; border-left:1px solid var(--line); padding-left:2rem;}
+  .about-stat b{ display:block; font-family:'Space Grotesk',sans-serif; font-size:2.2rem; color:var(--parchment); font-weight:600;}
+  .about-stat span{ font-family:'JetBrains Mono',monospace; font-size:0.72rem; letter-spacing:0.1em; color:var(--muted); text-transform:uppercase;}
+  @media (max-width:800px){ .about-grid{grid-template-columns:1fr;} }
+
+  /* ---------- CAMPAIGN LOG (career chapters) ---------- */
+  .chapter{
+    display:grid; grid-template-columns: 140px 1fr; gap:2.5rem;
+    padding:2.6rem 0; border-top:1px solid var(--line);
+    opacity:0; transform:translateY(24px); transition:opacity 0.7s ease, transform 0.7s ease;
+  }
+  .chapter.in{ opacity:1; transform:translateY(0); }
+  .chapter:last-child{ border-bottom:1px solid var(--line); }
+  .chapter-num{ font-family:'JetBrains Mono',monospace; color:var(--parchment); font-size:0.85rem; padding-top:0.3rem; font-weight:500;}
+  .chapter-num small{ display:block; color:var(--muted); margin-top:0.2rem; font-size:0.85rem; font-weight:500; font-family:'JetBrains Mono',monospace;}
+  #education .chapter p{ margin-bottom:0; }
+  #education .chapter .role{ margin-bottom:0; }
+  .chapter h3{ font-size:1.5rem; color:var(--parchment); margin-bottom:0.3rem;}
+  .chapter .role{ font-family:'JetBrains Mono',monospace; font-size:0.75rem; color:var(--parchment); letter-spacing:0.04em; margin-bottom:1rem; display:block; font-weight:500;}
+  .chapter p{ color:var(--muted); max-width:62ch; margin-bottom:1.2rem;}
+  .chip-row{ display:flex; flex-wrap:wrap; gap:0.6rem; }
+  .chip{
+    font-family:'JetBrains Mono',monospace; font-size:0.72rem; padding:0.35rem 0.8rem;
+    border:1px solid var(--line); border-radius:2px; color:var(--parchment);
+    background:var(--panel); transition:border-color 0.25s ease, color 0.25s ease;
+  }
+  a.chip{
+    text-decoration:none; cursor:pointer; display:inline-flex; align-items:center; gap:0.4rem;
+    transition:border-color 0.25s ease, background 0.25s ease, transform 0.2s ease;
+  }
+  a.chip::before{
+    content:'▶'; font-size:0.6rem; color:var(--gold-dim); transition:color 0.25s ease;
+  }
+  a.chip:hover{ border-color:var(--gold); background:var(--panel-2); transform:translateY(-1px); }
+  a.chip:hover::before{ color:var(--gold); }
+  .chapter:hover .chip{ border-color: rgba(201,169,97,0.25); }
+
+  /* ---------- FEATURED: AMARANTH ---------- */
+  .feature{
+    border:1px solid var(--line); background:linear-gradient(160deg, var(--panel), var(--panel-2));
+    padding:3.5rem; position:relative; overflow:hidden; border-radius:2px;
+  }
+  .feature::before{
+    content:''; position:absolute; width:420px; height:420px; border-radius:50%;
+    background: radial-gradient(circle, var(--glow), transparent 70%);
+    top:-200px; right:-160px; pointer-events:none;
+  }
+  .feature-tag{ font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:var(--parchment); letter-spacing:0.15em; text-transform:uppercase; font-weight:600;}
+  .feature h3{ font-size:clamp(1.8rem,3vw,2.4rem); margin:0.8rem 0 1.2rem; max-width:16ch;}
+  .feature .thesis{
+    font-family:'Space Grotesk',sans-serif; font-size:1.3rem; color:var(--parchment);
+    border-left:2px solid var(--gold); padding-left:1.2rem; margin:1.6rem 0; max-width:46ch;
+  }
+  .feature p.desc{ color:var(--muted); max-width:56ch; margin-bottom:1.5rem;}
+  .feature .credit{ font-family:'JetBrains Mono',monospace; font-size:0.75rem; color:var(--muted);}
+  .feature .credit b{ color:var(--parchment); font-weight:500;}
+
+  /* ---------- ATTRIBUTES ---------- */
+  .attr-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(230px,1fr)); gap:1px; background:var(--line); border:1px solid var(--line);}
+  .attr{ background:var(--ink); padding:2rem; }
+  .attr .eyebrow{ display:block; margin-bottom:0.8rem;}
+  .attr h4{ font-family:'Space Grotesk',sans-serif; font-size:1.2rem; color:var(--parchment); margin-bottom:0.6rem; font-weight:600;}
+  .attr p{ color:var(--muted); font-size:0.92rem; }
+
+  /* ---------- CONTACT / FOOTER ---------- */
+  .contact{ text-align:center; padding-top:9rem; padding-bottom:9rem;}
+  .contact .eyebrow{ display:block; margin-bottom:1rem;}
+  .contact h2{ font-size:clamp(2.2rem,6vw,4rem); margin-bottom:1.6rem;}
+  .contact-links{ display:flex; justify-content:center; gap:2.2rem; flex-wrap:wrap; margin-top:2.5rem; font-family:'JetBrains Mono',monospace;}
+  .contact-links a{
+    text-decoration:none; color:var(--parchment); border-bottom:1px solid var(--gold-dim);
+    padding-bottom:2px; font-size:0.9rem; transition:color 0.25s ease, border-color 0.25s ease;
+  }
+  .contact-links a:hover{ color:var(--parchment); border-color:var(--parchment); }
+  footer{
+    text-align:center; padding:2.5rem 8vw; border-top:1px solid var(--line);
+    font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:var(--muted); letter-spacing:0.05em;
+  }
+
+  .reveal{ opacity:0; transform:translateY(20px); transition:opacity 0.8s ease, transform 0.8s ease; }
+  .reveal.in{ opacity:1; transform:translateY(0); }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.01ms !important; transition-duration:0.01ms !important; scroll-behavior:auto !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+<div class="vignette"></div>
+
+<nav class="questlog" id="questlog">
+  <div class="ql-title">Index</div>
+  <a class="ql-item" data-target="hero"><span class="ql-mark">◆</span>Title</a>
+  <a class="ql-item" data-target="about"><span class="ql-mark">◆</span>Profile</a>
+  <a class="ql-item" data-target="experience"><span class="ql-mark">◆</span>Experience</a>
+  <a class="ql-item" data-target="feature"><span class="ql-mark">◆</span>Amaranth</a>
+  <a class="ql-item" data-target="attributes"><span class="ql-mark">◆</span>Skills</a>
+  <a class="ql-item" data-target="education"><span class="ql-mark">◆</span>Education</a>
+  <a class="ql-item" data-target="contact"><span class="ql-mark">◆</span>Contact</a>
+</nav>
+
+<section class="hero" id="hero">
+  <div class="hero-eyebrow eyebrow">Narrative Director — Storytelling Design Leadership</div>
+  <h1>Gabrielle<span>Shrager</span></h1>
+  <p class="hero-tagline">
+    <strong>AAA narrative director, storytelling leader, and writer</strong> with 30+ years shaping
+    original worlds, characters, and story-driven content for globally recognized franchises —
+    final creative authority on narrative departments, from story pitch to greenlight.
+  </p>
+  <div class="hero-meta">
+    <div>Games shipped<span>12+ AAA titles</span></div>
+    <div>Studios<span>Lightspeed LA · Ubisoft · Nevrax · Cryo</span></div>
+    <div>Languages<span>English · Français</span></div>
+  </div>
+  <div class="scroll-cue">Scroll to continue</div>
+</section>
+
+<section id="about">
+  <div class="section-head"><span class="eyebrow">00 — Profile</span><div class="section-rule"></div></div>
+  <div class="about-grid reveal">
+    <div>
+      <p class="about-lead">Story is a system before it's a scene. I design the architecture underneath —
+      character, world, branching structure — so the moments on screen earn their weight.</p>
+      <p class="about-body">Over thirty years shaping original worlds, characters, and story-driven
+      content for globally recognized franchises. Track record leading narrative departments as
+      final creative authority — greenlighting story pitches, mentoring writing teams, and building
+      narrative pipelines from the ground up. Deep experience across open-world RPG, action-adventure,
+      and systemic narrative design, with a passion for expansive, world-built storytelling and
+      cross-disciplinary collaboration with design, art, audio, and engineering.</p>
+    </div>
+    <div class="about-stats">
+      <div class="about-stat"><b>30+</b><span>Years in narrative design</span></div>
+      <div class="about-stat"><b>12+</b><span>AAA games shipped</span></div>
+      <div class="about-stat"><b>FR / EN</b><span>Bilingual, dual citizenship</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="experience">
+  <div class="section-head"><span class="eyebrow">01 — Experience</span><div class="section-rule"></div></div>
+
+  <div class="chapter reveal">
+    <div class="chapter-num">2022 —<small>Present</small></div>
+    <div>
+      <h3>Lightspeed LA (Tencent)</h3>
+      <span class="role">Lead Writer / Principal Narrative Designer</span>
+      <p>Creative lead for <em>Last Sentinel</em>, an AGI-themed open-world action-adventure —
+      leading worldbuilding, faction design, and all systemic and mission-based narrative content
+      from concept to greenlight. Built the game's VO design system and database from the ground up,
+      and lead and mentor a team of writers and designers, reviewing story pitches, developing the
+      World Bible, and directing VO recording sessions end-to-end.</p>
+      <div class="chip-row"><a class="chip" href="https://youtu.be/-JIFzUYhVGY" target="_blank" rel="noopener">Last Sentinel</a><span class="chip">World Bible</span><span class="chip">VO Direction</span><span class="chip">Team Leadership</span></div>
+    </div>
+  </div>
+
+  <div class="chapter reveal">
+    <div class="chapter-num">2006 —<small>2019</small></div>
+    <div>
+      <h3>Ubisoft</h3>
+      <span class="role">Narrative Director, Senior Writer</span>
+      <p><strong>Beyond Good &amp; Evil 2</strong> — creative lead for narrative design and story
+      content on this character-driven open-world Space Opera RPG.<br><br>
+      <strong>South Park: The Fractured But Whole</strong> — worked directly with the South Park
+      creators as final creative authority on all story-driven mission and world content; wrote and
+      directed 60+ story-driven missions and originated the game's superhero world and characters.<br><br>
+      <strong>Assassin's Creed Syndicate</strong> — led a team of designers on 65 story-driven missions
+      built around Victorian figures including Dickens, Marx, Darwin, and Queen Victoria; created the
+      PS4-exclusive "Dreadful Mysteries" arc and wrote the Jack the Ripper DLC.<br><br>
+      <strong>Tom Clancy's The Division</strong> (Consulting Narrative Director) — led worldbuilding,
+      characters, and missions across 100+ hours of play; created "ECHO," a signature narrative
+      delivery system, and directed the narrative team at Ubisoft Massive.</p>
+      <div class="chip-row">
+        <a class="chip" href="https://www.youtube.com/watch?v=EAYN08YoaV8" target="_blank" rel="noopener">Beyond Good &amp; Evil 2</a>
+        <a class="chip" href="https://www.youtube.com/watch?v=p5iH-uKHmfo" target="_blank" rel="noopener">South Park: FBW</a>
+        <a class="chip" href="https://www.youtube.com/watch?v=3kGHHMc5dqE" target="_blank" rel="noopener">Assassin's Creed Syndicate</a>
+        <a class="chip" href="https://www.youtube.com/watch?v=uElsBflqgYw" target="_blank" rel="noopener">The Division</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="chapter reveal">
+    <div class="chapter-num">2006 —<small>2019</small></div>
+    <div>
+      <h3>Ubisoft — Additional Credits</h3>
+      <span class="role">Story Consultant / Lead Writer / Content Designer</span>
+      <p>Original characters and story for <em>Valiant Hearts: The Great War</em> (2015 Annie, VGA,
+      BAFTA, PING awards); created setting, story, and the "Permadeath" mechanic for <em>ZombiU</em>;
+      lead writing and VO direction across <em>Rayman Origins HD</em>, <em>From Dust</em>,
+      <em>Tintin: The Adventures of the Unicorn</em>, <em>Ghost Recon Future Soldier</em>,
+      <em>Rabbids Go Home</em>, <em>Beowulf the Game</em>, <em>Red Steel 2</em>, and
+      <em>Rayman Raving Rabbids TV Party</em> — directing talent including Anthony Hopkins,
+      Ray Winstone, and Brendan Gleeson.</p>
+      <div class="chip-row"><a class="chip" href="https://www.youtube.com/watch?v=54nPTJyrkSc" target="_blank" rel="noopener">Valiant Hearts</a><a class="chip" href="https://www.youtube.com/watch?v=WAmK9FAMw9E" target="_blank" rel="noopener">ZombiU</a><a class="chip" href="https://www.youtube.com/watch?v=l_fz4m74nJw" target="_blank" rel="noopener">Rayman Origins HD</a><span class="chip">VO Casting &amp; Direction</span></div>
+    </div>
+  </div>
+
+  <div class="chapter reveal">
+    <div class="chapter-num">2003 —<small>2005</small></div>
+    <div>
+      <h3>Nevrax Ltd.</h3>
+      <span class="role">Editorial Director, Lead Writer</span>
+      <p>Originated the storyline, world, dialogue, and IP for "Atys, Planet Tree" on <em>The Saga
+      of Ryzom</em>, a sci-fi/fantasy MMORPG — developed an illustrated encyclopedia and bestiary.
+      Winner, 2005 MMORPG.com Reader's Choice Award for Best Story.</p>
+      <div class="chip-row"><a class="chip" href="https://www.youtube.com/watch?v=9yAd_jdGqOM" target="_blank" rel="noopener">The Saga of Ryzom</a><span class="chip">MMORPG</span><span class="chip">World-building</span></div>
+    </div>
+  </div>
+
+  <div class="chapter reveal">
+    <div class="chapter-num">1999 —<small>2002</small></div>
+    <div>
+      <h3>Cryo Interactive &amp; Cryo Networks</h3>
+      <span class="role">Lead Game Designer, Scriptwriter</span>
+      <p>Credits include <em>Arthur's Knights I &amp; II</em>, <em>FOG</em> (an episodic
+      collaborative murder-mystery), and <em>POGO</em>, a learning platform for the European
+      Commission.</p>
+      <div class="chip-row"><span class="chip">Arthur's Knights</span><span class="chip">FOG</span><span class="chip">POGO</span></div>
+    </div>
+  </div>
+
+  <div class="chapter reveal">
+    <div class="chapter-num">1989 —<small>1999</small></div>
+    <div>
+      <h3>Earlier Career</h3>
+      <span class="role">Editorial &amp; Communications Leadership</span>
+      <p>Manager of Special Projects &amp; Editor-in-Chief, The Walt Disney Company (Disneyland
+      Paris); Senior Account Director, Herald Communications / J. Walter Thompson; Account Director,
+      Ruder Finn PR; Editorial Manager, Airbus (employee magazine, circulation 55,000, 4 languages).</p>
+      <div class="chip-row"><span class="chip">Disneyland Paris</span><span class="chip">J. Walter Thompson</span><span class="chip">Ruder Finn</span><span class="chip">Airbus</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="feature">
+  <div class="section-head"><span class="eyebrow">02 — Featured Work</span><div class="section-rule"></div></div>
+  <div class="feature reveal">
+    <span class="feature-tag">Patent-pending · Co-invented with Dr. Jeffrey C. Shrager</span>
+    <h3>Amaranth</h3>
+    <p class="thesis">"Everyone preserves the past. No one activates it."</p>
+    <p class="desc">A spreading-activation associative memory architecture — the Mnémothèque Engine —
+    built on principles from the classical ars memorativa tradition and thirty-five years of
+    development, from a 1991 original concept through to a patent-pending system pitched to
+    Apple, Google, and frontier AI labs. Where most memory systems store, Amaranth activates:
+    surfacing connections the way human associative memory actually works.</p>
+    <div class="credit">Co-invented with <b>Dr. Jeffrey C. Shrager</b>, cognitive scientist, Stanford-affiliated</div>
+  </div>
+</section>
+
+<section id="attributes">
+  <div class="section-head"><span class="eyebrow">03 — Skills</span><div class="section-rule"></div></div>
+  <div class="attr-grid reveal">
+    <div class="attr"><span class="eyebrow">Leadership</span><h4>Narrative Direction &amp; Team Leadership</h4><p>Final creative authority on story; mentoring writing teams and building narrative departments.</p></div>
+    <div class="attr"><span class="eyebrow">Core</span><h4>World-Building &amp; Original IP</h4><p>Originating worlds, factions, and canon that hold together at franchise scale.</p></div>
+    <div class="attr"><span class="eyebrow">Systems</span><h4>Open-World &amp; Systemic Narrative</h4><p>Mission and quest design, branching and systemic dialogue at scale.</p></div>
+    <div class="attr"><span class="eyebrow">Production</span><h4>Narrative Pipeline &amp; Process</h4><p>Building narrative pipelines and content systems from the ground up.</p></div>
+    <div class="attr"><span class="eyebrow">Audio</span><h4>VO Direction &amp; Casting</h4><p>End-to-end voice direction, from casting sides through in-session performance.</p></div>
+    <div class="attr"><span class="eyebrow">Language</span><h4>Bilingual, FR / EN</h4><p>Native fluency across French and English markets and collaborators.</p></div>
+  </div>
+</section>
+
+<section id="education">
+  <div class="section-head"><span class="eyebrow">04 — Education</span><div class="section-rule"></div></div>
+  <div class="chapter reveal">
+    <div class="chapter-num">1999 —<small>2000</small></div>
+    <div>
+      <h3>CELSA, La Sorbonne (Paris IV)</h3>
+      <span class="role">DESS, Designing and Managing Multimedia Projects</span>
+    </div>
+  </div>
+  <div class="chapter reveal">
+    <div class="chapter-num">1985 —<small>1989</small></div>
+    <div>
+      <h3>Amherst College</h3>
+      <span class="role">B.A. Political Science, Magna Cum Laude</span>
+    </div>
+  </div>
+</section>
+
+<section id="contact" class="contact">
+  <span class="eyebrow">05 — Contact</span>
+  <h2>Let's build the<br>next world.</h2>
+  <p style="color:var(--muted); max-width:46ch; margin:0 auto;">
+    Open to Narrative Director, Lead Writer, and Principal Narrative Design roles —
+    and always glad to talk story systems, memory architecture, or worldbuilding.
+  </p>
+  <div class="contact-links">
+    <a href="mailto:gabrielle.shrager@gmail.com">Email</a>
+    <a href="#">LinkedIn</a>
+    <a href="#">Résumé (PDF)</a>
+  </div>
+</section>
+
+<footer>Gabrielle Shrager — Narrative Design &amp; Story Systems — © 2026</footer>
+
+<script>
+  // reveal-on-scroll
+  const revealEls = document.querySelectorAll('.reveal, .chapter');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); } });
+  }, {threshold:0.15});
+  revealEls.forEach(el=>io.observe(el));
+
+  // quest log active state + nav
+  const sections = ['hero','about','experience','feature','attributes','education','contact'].map(id=>document.getElementById(id));
+  const qlItems = document.querySelectorAll('.ql-item');
+  qlItems.forEach(item=>{
+    item.addEventListener('click', ()=>{
+      const target = document.getElementById(item.dataset.target);
+      if(target) target.scrollIntoView({behavior:'smooth'});
+    });
+  });
+  const navObserver = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        const id = entry.target.id;
+        qlItems.forEach(item=>item.classList.toggle('active', item.dataset.target===id));
+      }
+    });
+  }, {threshold:0.5});
+  sections.forEach(s=>{ if(s) navObserver.observe(s); });
+</script>
+
+</body>
+</html>
