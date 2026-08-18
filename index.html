@@ -9,16 +9,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink: #333338;
-    --panel: #3d3d43;
-    --panel-2: #46464d;
-    --gold: #d3a85e;
-    --gold-dim: #a6864c;
-    --teal: #8bb0bd;
+    --ink: #d6d4cf;
+    --panel: #c9c7c0;
+    --panel-2: #bcbab2;
+    --gold: #8a6a34;
+    --gold-dim: #6e5429;
+    --teal: #3c6e78;
     --parchment: #000000;
-    --muted: #1a1a1a;
+    --muted: #46433b;
     --line: rgba(0,0,0,0.22);
-    --glow: rgba(211,168,94,0.14);
+    --glow: rgba(138,106,52,0.14);
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   html{scroll-behavior:smooth;}
@@ -34,7 +34,7 @@
   a{color:inherit;}
   .eyebrow{
     font-family:'JetBrains Mono', monospace;
-    font-size:0.72rem;
+    font-size:0.76rem;
     letter-spacing:0.22em;
     text-transform:uppercase;
     color:var(--parchment);
@@ -49,7 +49,7 @@
   }
   .vignette{
     position:fixed; inset:0; pointer-events:none; z-index:1;
-    background: radial-gradient(ellipse at 50% 0%, transparent 40%, rgba(0,0,0,0.55) 100%);
+    background: radial-gradient(ellipse at 50% 0%, transparent 55%, rgba(0,0,0,0.10) 100%);
   }
 
   /* ---------- QUEST LOG NAV ---------- */
@@ -59,7 +59,7 @@
     padding:0 2.2rem; z-index:50; gap:1.1rem;
   }
   .questlog .ql-title{
-    font-family:'JetBrains Mono', monospace; font-size:0.65rem;
+    font-family:'JetBrains Mono', monospace; font-size:0.72rem;
     letter-spacing:0.2em; color:var(--muted); text-transform:uppercase;
     margin-bottom:0.6rem; opacity:0.7;
   }
@@ -67,7 +67,7 @@
     display:flex; align-items:baseline; gap:0.6rem; cursor:pointer;
     font-family:'JetBrains Mono', monospace; font-size:0.78rem;
     color:var(--muted); transition:color 0.35s ease, transform 0.35s ease;
-    text-decoration:none; opacity:0.55;
+    text-decoration:none; opacity:0.75;
   }
   .ql-item .ql-mark{ color:var(--gold-dim); transition:color .35s ease;}
   .ql-item.active{ color:var(--parchment); opacity:1; transform:translateX(-4px);}
@@ -112,7 +112,7 @@
 
   .scroll-cue{
     position:absolute; bottom:2.5rem; left:8vw; font-family:'JetBrains Mono',monospace;
-    font-size:0.68rem; letter-spacing:0.18em; color:var(--muted); text-transform:uppercase;
+    font-size:0.74rem; letter-spacing:0.18em; color:var(--muted); text-transform:uppercase;
     display:flex; align-items:center; gap:0.6rem;
   }
   .scroll-cue::after{
@@ -135,7 +135,7 @@
   .about-body{ margin-top:1.5rem; color:var(--muted); font-size:1rem; max-width:52ch;}
   .about-stats{ display:flex; flex-direction:column; gap:1.6rem; border-left:1px solid var(--line); padding-left:2rem;}
   .about-stat b{ display:block; font-family:'Space Grotesk',sans-serif; font-size:2.2rem; color:var(--parchment); font-weight:600;}
-  .about-stat span{ font-family:'JetBrains Mono',monospace; font-size:0.72rem; letter-spacing:0.1em; color:var(--muted); text-transform:uppercase;}
+  .about-stat span{ font-family:'JetBrains Mono',monospace; font-size:0.76rem; letter-spacing:0.1em; color:var(--muted); text-transform:uppercase;}
   @media (max-width:800px){ .about-grid{grid-template-columns:1fr;} }
 
   /* ---------- CAMPAIGN LOG (career chapters) ---------- */
@@ -155,7 +155,7 @@
   .chapter p{ color:var(--muted); max-width:62ch; margin-bottom:1.2rem;}
   .chip-row{ display:flex; flex-wrap:wrap; gap:0.6rem; }
   .chip{
-    font-family:'JetBrains Mono',monospace; font-size:0.72rem; padding:0.35rem 0.8rem;
+    font-family:'JetBrains Mono',monospace; font-size:0.76rem; padding:0.35rem 0.8rem;
     border:1px solid var(--line); border-radius:2px; color:var(--parchment);
     background:var(--panel); transition:border-color 0.25s ease, color 0.25s ease;
   }
@@ -180,7 +180,7 @@
     background: radial-gradient(circle, var(--glow), transparent 70%);
     top:-200px; right:-160px; pointer-events:none;
   }
-  .feature-tag{ font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:var(--parchment); letter-spacing:0.15em; text-transform:uppercase; font-weight:600;}
+  .feature-tag{ font-family:'JetBrains Mono',monospace; font-size:0.76rem; color:var(--parchment); letter-spacing:0.15em; text-transform:uppercase; font-weight:600;}
   .feature h3{ font-size:clamp(1.8rem,3vw,2.4rem); margin:0.8rem 0 1.2rem; max-width:16ch;}
   .feature .thesis{
     font-family:'Space Grotesk',sans-serif; font-size:1.3rem; color:var(--parchment);
@@ -209,7 +209,7 @@
   .contact-links a:hover{ color:var(--parchment); border-color:var(--parchment); }
   footer{
     text-align:center; padding:2.5rem 8vw; border-top:1px solid var(--line);
-    font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:var(--muted); letter-spacing:0.05em;
+    font-family:'JetBrains Mono',monospace; font-size:0.76rem; color:var(--muted); letter-spacing:0.05em;
   }
 
   .reveal{ opacity:0; transform:translateY(20px); transition:opacity 0.8s ease, transform 0.8s ease; }
